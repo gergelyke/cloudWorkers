@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <title>drink 'n go</title>
+        <meta name="description" content="">
+        <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+    </head>
+    <body>
+        <h3>workerCloud</h3>
+        <h5>fuckyeah!</h5>
+        <script>
+            (function () {
+                // init our variables
+                var slaveWorker = new Worker('/js/worker.js'),
+                    data,
+                    getJobs,
+                    postResults;
+
+                getJobs = function() {
+                    // get data from external URL
+                    $.get('/jobs', function(data) {
+                        // start the worker with the first piece of data to process
+                        slaveWorker.postMessage({
+                            data: data
+                        });
+                    });
+                }
+
+                postResults = function(results) {
+                    // post results to the server
+                    $.post("/results", {
+                        results: results
+                    }, function(res){
+                        // console.log(res);
+                    });
+                }
+
+                getJobs();
+
+                // handle responses from the worker
+                slaveWorker.onmessage = function (oEvent) {
+                    var results;
+                    switch (oEvent.data.type) {
+                        case 'finished':
+                            // console.log('finished', oEvent.data.results);
+                            results = oEvent.data.results;
+                            // send the data back to the server
+                            postResults(results);
+                            // get more data
+                            getJobs();
+                        break;
+
+                        case 'error':
+                            console.error('error');
+                            // send error report to the server 
+                        break;
+
+                        default:
+                            console.warn('default: this should not happen');
+                        break;
+                    }
+                };
+
+            }());
+        </script>
+
+    </body>
+</html>
