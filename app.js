@@ -25,6 +25,12 @@ app.get('/', function(req, res) {
     res.render('index');
 });
 
+/*
+    Here goes the logic, which serve the tasks to the clients
+    Make sure you generate some kind of an ID to each task, so you can
+    identify them.
+*/
+
 app.get('/jobs', function(req, res) {
     res.json([
         1,
@@ -34,6 +40,10 @@ app.get('/jobs', function(req, res) {
         5
     ]);
 });
+
+/*
+    Here goes the logic, which process the results from the client.
+*/
 
 app.post('/results', function(req, res) {
     console.log(req.param('results'))
